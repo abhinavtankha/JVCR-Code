@@ -1,0 +1,12 @@
+#python2.7
+torch
+torchvision
+scipy
+numpy
+tensorboard
+matplotlib
+Pillow
+matplotlib
+requests
+tensorflow
+conda
