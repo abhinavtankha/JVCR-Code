@@ -171,7 +171,7 @@ def train(args):
             # cuda
             if is_cuda:
                 images = torch.autograd.Variable(images.cuda())
-                hg_tensors = [torch.autograd.Variable(hg_tensors[i].cuda(async=True), volatile=True) for i in range(len(hg_tensors))]
+                #hg_tensors = [torch.autograd.Variable(hg_tensors[i].cuda(async=True), volatile=True) for i in range(len(hg_tensors))]
                 reg_tensors = torch.autograd.Variable(reg_tensors.cuda(async=True))                
 
             #compute losses
