@@ -86,8 +86,8 @@ def main(args):
 
 
 def download_dataset(args):
-    file_id = '1zZ6B3r8H2XrvT96GAfCpgzkSGZMSLtIU' # test doc
-    #file_id = '1kQihg2Yfc2clM5Qavxh2RiGc2EIg-4bX' # afwlp-2000 - 2GB
+    #file_id = '1zZ6B3r8H2XrvT96GAfCpgzkSGZMSLtIU' # test doc
+    file_id = '1kQihg2Yfc2clM5Qavxh2RiGc2EIg-4bX' # afwlp-2000 - 2GB
     destination = args.dataset_path + args.dataset_file_name + ".tar"
     print(destination)
     logger
