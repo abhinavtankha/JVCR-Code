@@ -20,13 +20,14 @@ from torch.utils.data import DataLoader
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 from logger import Logger
+import torch.backends.cudnn as cudnn
 
 import utils
 from models import Bottleneck, coordRegressor, HourglassNet
 
 
 def lossHourglass(output, tensors):
-    loss_fn = torch.nn.MSELoss(reduction='sum')
+    loss_fn = torch.nn.MSELoss(size_average=True).cuda()
     loss_layer1 = loss_fn(output[0], tensors[0])  
     loss_layer2 = loss_fn(output[1], tensors[1])           
     loss_layer3 = loss_fn(output[2], tensors[2])   
@@ -38,7 +39,7 @@ def lossHourglass(output, tensors):
     return total_loss
 
 def lossCoordinate(pred, input_pts):
-    loss_fn = torch.nn.MSELoss(reduction='sum')
+    loss_fn = torch.nn.MSELoss(size_average=True).cuda()
     return loss_fn(pred, input_pts)
 
 def logTensorBoard(epoch, loss, model):
@@ -85,8 +86,8 @@ def main(args):
 
 
 def download_dataset(args):
-    #file_id = '1zZ6B3r8H2XrvT96GAfCpgzkSGZMSLtIU' # test doc
-    file_id = '1kQihg2Yfc2clM5Qavxh2RiGc2EIg-4bX' # afwlp-2000 - 2GB
+    file_id = '1zZ6B3r8H2XrvT96GAfCpgzkSGZMSLtIU' # test doc
+    #file_id = '1kQihg2Yfc2clM5Qavxh2RiGc2EIg-4bX' # afwlp-2000 - 2GB
     destination = args.dataset_path + args.dataset_file_name + ".tar"
     print(destination)
     logger
@@ -95,6 +96,16 @@ def download_dataset(args):
 
 
 def train(args):
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
+    print("gpus>>", args.gpus)
+    if args.gpus == '' or not torch.cuda.is_available():
+        is_cuda = False
+        print('Run in CPU mode.')
+    else:
+        is_cuda = True
+        cudnn.benchmark = True
+
     num_stacks=1
     num_blocks=4
     num_classes=[1, 2, 4, 64]
@@ -115,9 +126,12 @@ def train(args):
         print('coordinate-regression-training..')
         model = coordRegressor(68)
 
+    if is_cuda:
+        model = torch.nn.DataParallel(model).cuda()
+
     train_dataset = JVCRDataSet(dataset_path)
     
-    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
 
     #optimizer
     if optimizer == "ADAM":
@@ -154,6 +168,12 @@ def train(args):
               pts.append(utils.transform_utils.to_torch(utils.transform_utils.readPtsTorch(dataset_path+item+".pts")))        
             images = utils.transform_utils.inputListTransform(images, pts)
             
+            # cuda
+            if is_cuda:
+                images = torch.autograd.Variable(images.cuda())
+                hg_tensors = [torch.autograd.Variable(target[i].cuda(async=True), volatile=True) for i in range(len(target))]
+                reg_tensors = torch.autograd.Variable(reg_tensors.cuda(async=True))                
+
             #compute losses
             if pre_train_mode == "hourglass":
                 tensors = utils.transform_utils.reshapeTensorList(hg_tensors)
@@ -192,6 +212,7 @@ if __name__ == '__main__':
     parser.add_argument('-dl', '--data_loader_batch_size', default=4, type=int, help='data loader batch size')
     parser.add_argument('-mode', '--mode', default='download', type=str, help='modes -> download_dataset, pre-train, train') 
     parser.add_argument('-pre_train_mode', '--pre_train_mode', default='hourglass', type=str, help=' eg. hourglass, coordinate. this is for individual training of the models') 
+    parser.add_argument('-gpus', '--gpus', default='0', type=str, help='set gpu IDs')
     # should default be /data
     parser.add_argument('-dspath', '--dataset_path', default='./data/', type=str, help='data set path') # TBD change to /tmp
     parser.add_argument('-dsname', '--dataset_file_name', default='JVCR-AFLW200-Dataset', type=str, help='data set name') 
