@@ -183,8 +183,8 @@ def train(args):
                 loss = lossHourglass(output, tensors)
             else: # coordinate regression
                 input_tensor = torch.stack(reg_tensors)
-                input_tensor = input_tensor.unsqueeze(1)
-                input_pts = torch.stack(pts).view(batch_size,-1)
+                input_tensor = input_tensor.unsqueeze(1).cuda()
+                input_pts = torch.stack(pts).view(batch_size,-1).cuda()
                 y_pred, y_pred1, y_pred_2 = model(input_tensor)
                 loss = lossCoordinate(y_pred_2, input_pts)
 
