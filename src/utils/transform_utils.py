@@ -393,13 +393,16 @@ def inputListTransform(imgList, ptsList):
         
     return torch.stack(input_tensor_list)
   
-def reshapeTensorList(tensorList):
+def reshapeTensorList(tensorList, is_cuda):
   outerList = []
   for idx1 in range(0,len(tensorList)):
     innerList = []
     for idx2 in range(0, len(tensorList[0])):
       innerList.append(tensorList[idx2][idx1].squeeze(0))
-    outerList.append(torch.stack(innerList))
+    if is_cuda:
+        outerList.append(torch.stack(innerList).cuda())
+    else:
+        outerList.append(torch.stack(innerList))
   return outerList
 
 def save_model(model, optimizer, file_name):

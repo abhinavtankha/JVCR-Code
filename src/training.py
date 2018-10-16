@@ -178,7 +178,7 @@ def train(args):
 
             #compute losses
             if pre_train_mode == "hourglass":
-                tensors = utils.transform_utils.reshapeTensorList(hg_tensors)
+                tensors = utils.transform_utils.reshapeTensorList(hg_tensors, is_cuda)
                 output = model(images)
                 loss = lossHourglass(output, tensors)
             else: # coordinate regression
