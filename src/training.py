@@ -105,6 +105,7 @@ def train(args):
     else:
         is_cuda = True
         cudnn.benchmark = True
+        torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
     num_stacks=1
     num_blocks=4
@@ -128,6 +129,7 @@ def train(args):
 
     if is_cuda:
         model = torch.nn.DataParallel(model).cuda()
+
 
     train_dataset = JVCRDataSet(dataset_path)
     
