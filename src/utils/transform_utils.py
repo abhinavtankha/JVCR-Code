@@ -405,9 +405,12 @@ def reshapeTensorList(tensorList, is_cuda):
         outerList.append(torch.stack(innerList))
   return outerList
 
-def save_model(model, optimizer, file_name):
+def save_model(model, optimizer, file_dir, file_name):
+    if not os.path.isdir(file_dir):
+        os.makedirs(file_dir)
+        
     torch.save({
         'model' : model,
         'model_state_dict': model.state_dict(),
         'optimizer' : optimizer
-    }, file_name)
+    }, file_dir + "/" + file_name)

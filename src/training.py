@@ -197,8 +197,9 @@ def train(args):
                   
         if epoch % save_freq == 0:
             logTensorBoard(epoch, loss, model)
-            file_name = args.modelsdir +'/epoch-'+str(epoch)+'-loss-'+str(loss.item())+'-'+pre_train_mode+'-model-opt.model'
-            utils.transform_utils.save_model(model, optimizer, file_name)
+            file_dir = args.modelsdir
+            file_name = 'epoch-'+str(epoch)+'-loss-'+str(loss.item())+'-'+pre_train_mode+'-model-opt.model'
+            utils.transform_utils.save_model(model, optimizer, file_dir, file_name)
             print('model '+file_name+' saved..')
 
 
@@ -209,7 +210,7 @@ if __name__ == '__main__':
     parser.add_argument('-lr', '--learning_rate', default=1e-4, type=float, help='learning rate for the model')
     parser.add_argument('-o', '--optimizer', default='eg. RMSPROP, ADAM', type=str, help='optimizer to use. eg. ADAM, RMSPROP, SGD')
     parser.add_argument('-m', '--momentum', default=0, type=float, help='data set name') 
-    parser.add_argument('-s', '--model_save_freq', default=5, type=int, help='checkpoint save frequency(# of epochs)')
+    parser.add_argument('-s', '--model_save_freq', default=2, type=int, help='checkpoint save frequency(# of epochs)')
     parser.add_argument('-e', '--epochs', default=25, type=int, help='# of epochs')
     parser.add_argument('-dl', '--data_loader_batch_size', default=4, type=int, help='data loader batch size')
     parser.add_argument('-mode', '--mode', default='download', type=str, help='modes -> download_dataset, pre-train, train') 
